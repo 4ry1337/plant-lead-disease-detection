@@ -11,7 +11,7 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Plant disease identification in leaf images using multi-scale high-resolution  visual transformers}
+\title{Plant disease identification in leaf images using multi-scale high-resolution  visual transformers with linear projection for feature reduction}
 
 \author{\IEEEauthorblockN{Rakhat Yskak}
 \IEEEauthorblockA{\textit{School of Engineering and Digital Sciences} \\
@@ -20,39 +20,48 @@ Astana, Kazakhstan}}
 
 \maketitle
 \begin{abstract}
-In this project, I developed a framework for automated plant disease identification using Vision Transformers and High-Resolution Networks. The model was trained on a custom subset of the PlantVillage dataset and evaluated using micro and macro-averaged metrics, achieving a micro-averaged F1-score of 0.98 and a Hamming loss of 0.025. The results highlight the model's effectiveness and potential for agricultural applications.
+For this project, I used Vision Transformers and High-Resolution Networks to create a framework for automatically identifying plant diseases. The model achieved a micro-averaged F1-score of 0.98 and a Hamming loss of 0.025 after being trained on a customised subset of the PlantVillage dataset and assessed using micro and macro-averaged metrics. The outcomes demonstrate the efficacy of the model and its potential for use in agriculture.
 \end{abstract}
 
 \section{Introduction}
-The accurate and early identification of plant diseases is crucial for ensuring food security and reducing agricultural losses. Traditional methods of disease detection often rely on manual inspections, which are time-consuming and prone to human error. Deep learning techniques, particularly convolutional neural networks (CNNs), have improved image-based disease detection but struggle to simultaneously capture global features and high-resolution details.
+Reducing agricultural losses and guaranteeing food security depend on the precise and timely detection of plant diseases. Conventional disease detection techniques frequently depend on labour-intensive, human-error-prone manual checks. While deep learning methods, especially convolutional neural networks (CNNs), have made image-based illness identification better, they have trouble capturing both high-resolution details and global characteristics at the same time.
 
-To address these limitations, I propose an approach that integrates Vision Transformers (ViTs) with High-Resolution Networks (HRNet) for efficient and accurate plant disease classification. This approach leverages ViTs for global feature extraction and HRNet for multi-scale feature representation, aiming to enhance classification performance.
+In order to overcome these constraints, I suggest a method that combines High-Resolution Networks (HRNet) with Vision Transformers (ViTs) for the effective and precise classification of plant diseases. In order to improve classification performance, this method makes use of HRNet for multi-scale feature representation and ViTs for global feature extraction.
 
 \section{Methodology}
 \subsection{Model Architecture}
-The core of my project is a model, which combines the principles of ViT and HRNets to effectively capture and process high-resolution features. This design leverages recent techniques from \cite{wang2020} and \cite{gu2021}.
+My project's central component is a model that efficiently captures and processes high-resolution information by fusing the ideas of ViT and HRNets. Recent methods from \cite{wang2020} and \cite{gu2021} are used in this design.
 
-The model divides each input image $x \in \mathbb{R}^{H \times W \times C}$ into non-overlapping patches of size $p \times p$. The total number of patches $N$ is computed as:
+First, each input image $x \in \mathbb{R}^{H \times W \times C}$ is divided into non-overlapping $N$ patches of size $p \times p$:
 \begin{equation}
     N = \frac{H \cdot W}{p^2}
 \end{equation}
-
-Each patch is embedded and combined with positional embeddings:
+Then, to each embedded patch we add their positional embeddings:
 \begin{equation}
     z = E \cdot x_{\text{patch}} + P
 \end{equation}
-where $E$ is the patch embedding matrix and $P$ denotes the positional embeddings, ensuring the model preserves the spatial structure as described in \cite{Dosovitskiy2020}.
+where $E$ is the patch embedding matrix and $P$ denotes the positional embeddings. This ensures that the model preserves the spatial structure\cite{sebastian2024}.
 
-Multi-scale architecture inspired by HRNet was apoted to maintain high-resolution feature maps throughout the model \cite{wang2020}. The fusion mechanism across multiple resolutions is defined as:
+My inspiration to combine HRNet with ViT, came from the architecture of multi-scale high-resolution ViTs by \cite{gu2021}, which gradually grows to four branches and contains several modules with multiple Transformer blocks in each step.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{hrvit.png}
+    \caption{The overall architecture of HRViT.}
+    \label{fig:enter-label}
+\end{figure}
+
+The fusion mechanism across multiple resolutions is defined as:
 \begin{equation}
     x^l_i = \sum_{j=1}^s F_{ij}(x^{l-1}_j)
 \end{equation}
-where $x^l_i$ represents the feature map at resolution $i$ in layer $l$, $s$ is the number of resolutions, and $F_{ij}$ is the transformation function, which combines convolutional and attention operations for effective feature fusion.
+$x^l_i$ represents the feature map at resolution $i$ in layer $l$, $s$ is the number of resolutions, and $F_{ij}$ is the transformation function, combining convolutional and attention operations for effective feature fusion.
 
 \subsection{Dataset and Preprocessing}
-For this project, I constructed a custom subset inspired by the PlantVillage dataset, similar to the one described in ViTaL \cite{sebastian2024}. My dataset contains 11 classes with 275 images per class to ensure class balance. Each image was resized to a fixed resolution of $256 \times 256$ pixels, and I applied a series of preprocessing and augmentation techniques to enhance the model's performance.
+Since ViTaL's dataset is unavailable online, I decided to use a similar one with the same classes but different images \cite{sebastian2024} for a fair comparison between models. Therefore, my dataset contains 11 classes with 275 images per class to ensure class balance. 
 
-The preprocessing pipeline includes:
+I applied a series of preprocessing and augmentation techniques to enhance the model's performance, including:
+
 \begin{enumerate}
     \item Resizing with bilinear interpolation.
     \item Min-max normalization:
